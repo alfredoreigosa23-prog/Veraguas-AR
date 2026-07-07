@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VeraguasAR — Turismo con Realidad Aumentada</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #0F2A4A;
+      --navy2:  #163656;
+      --gold:   #F5A623;
+      --gold2:  #E8931A;
+      --teal:   #2EC4B6;
+      --white:  #FFFFFF;
+      --light:  #F4F8FB;
+      --gray:   #6B7C93;
+      --dark:   #0A1E35;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Open Sans', sans-serif; background: var(--white); color: var(--navy); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,42,74,0.97); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+    }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--gold); letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: .85rem; font-weight: 600; letter-spacing: .5px; transition: color .2s; }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      background: linear-gradient(160deg, var(--dark) 0%, var(--navy) 50%, #1a4a6e 100%);
+      padding: 100px 5% 60px; position: relative; overflow: hidden;
+    }
+    #hero canvas { position: absolute; inset: 0; pointer-events: none; }
+    .hero-eyebrow {
+      background: var(--gold); color: var(--dark);
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .75rem;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 18px; border-radius: 20px; margin-bottom: 1.5rem;
+      display: inline-block; position: relative;
+    }
+    .hero-title {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: clamp(2.4rem, 6vw, 4.5rem); line-height: 1.1;
+      color: var(--white); margin-bottom: 1rem; position: relative;
+    }
+    .hero-title span { color: var(--gold); }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: rgba(255,255,255,0.75);
+      max-width: 640px; line-height: 1.7; margin-bottom: 2.5rem; position: relative;
+    }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: relative; }
+    .btn-primary {
+      background: var(--gold); color: var(--dark); font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: .95rem; padding: 14px 32px; border-radius: 8px;
+      text-decoration: none; transition: background .2s, transform .15s;
+    }
+    .btn-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+    .btn-outline {
+      border: 2px solid rgba(255,255,255,0.4); color: var(--white);
+      font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: .95rem;
+      padding: 14px 32px; border-radius: 8px; text-decoration: none; transition: border-color .2s, transform .15s;
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+    .hero-stats {
+      display: flex; gap: 3rem; margin-top: 4rem; position: relative;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 2rem; color: var(--gold); }
+    .stat-label { font-size: .78rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 90px 5%; }
+    .section-eyebrow {
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .72rem;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--teal);
+      margin-bottom: .6rem;
+    }
+    .section-title {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2;
+      color: var(--navy); margin-bottom: 1rem;
+    }
+    .section-title.light { color: var(--white); }
+    .section-lead { font-size: 1.05rem; color: var(--gray); line-height: 1.8; max-width: 680px; }
+    .section-lead.light { color: rgba(255,255,255,0.75); }
+    .divider { width: 48px; height: 4px; background: var(--gold); border-radius: 2px; margin: 1rem 0 2rem; }
+
+    /* ── PROBLEMA ── */
+    #problema { background: var(--light); }
+    .problema-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-top: 3rem; }
+    .problema-text p { color: var(--gray); line-height: 1.8; margin-bottom: 1rem; font-size: 1rem; }
+    .problema-text strong { color: var(--navy); }
+    .card-list { display: flex; flex-direction: column; gap: 1rem; }
+    .card-item {
+      background: var(--white); border-left: 4px solid var(--gold);
+      border-radius: 0 8px 8px 0; padding: 1.2rem 1.4rem;
+      box-shadow: 0 2px 12px rgba(15,42,74,0.07);
+    }
+    .card-item h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); margin-bottom: .3rem; font-size: .95rem; }
+    .card-item p { font-size: .88rem; color: var(--gray); line-height: 1.6; }
+
+    /* ── PROPUESTA ── */
+    #propuesta { background: var(--navy); }
+    .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .module-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 12px; padding: 1.8rem; transition: background .2s, transform .2s;
+    }
+    .module-card:hover { background: rgba(245,166,35,0.1); transform: translateY(-4px); }
+    .module-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .module-card h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--gold); margin-bottom: .5rem; font-size: 1rem; }
+    .module-card p { font-size: .88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+
+    /* ── SITIOS ── */
+    #sitios { background: var(--white); }
+    .sitios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .sitio-card {
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(15,42,74,0.1);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .sitio-card:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(15,42,74,0.15); }
+    .sitio-header { background: var(--navy); padding: 1.5rem; }
+    .sitio-header h3 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--white); font-size: 1rem; }
+    .sitio-tipo { font-size: .72rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: .4rem; font-weight: 600; }
+    .sitio-body { padding: 1.2rem 1.5rem; background: var(--light); }
+    .sitio-body p { font-size: .88rem; color: var(--gray); line-height: 1.6; }
+    .sitio-tag {
+      display: inline-block; margin-top: .8rem;
+      background: var(--navy); color: var(--teal);
+      font-size: .72rem; font-weight: 700; letter-spacing: .5px;
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ── METODOLOGÍA ── */
+    #metodologia { background: var(--light); }
+    .fases { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .fase {
+      background: var(--white); border-radius: 12px; padding: 2rem;
+      box-shadow: 0 2px 12px rgba(15,42,74,0.07); position: relative; overflow: hidden;
+    }
+    .fase::before { content: attr(data-num); position: absolute; top: -10px; right: 16px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 5rem; color: rgba(15,42,74,0.05); line-height: 1; }
+    .fase h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); margin-bottom: .8rem; font-size: 1rem; }
+    .fase p { font-size: .88rem; color: var(--gray); line-height: 1.7; }
+    .fase-label { font-size: .7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: .5rem; }
+
+    /* ── RESULTADOS ── */
+    #resultados { background: var(--navy); }
+    .comp-table { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: .88rem; }
+    .comp-table th { background: var(--gold); color: var(--dark); font-family: 'Montserrat', sans-serif; font-weight: 700; padding: 12px 16px; text-align: left; }
+    .comp-table td { padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+    .comp-table tr:hover td { background: rgba(255,255,255,0.04); }
+    .comp-table td.yes { color: var(--teal); font-weight: 700; }
+    .comp-table td.no { color: rgba(255,255,255,0.35); }
+    .comp-table td.veraguas { color: var(--gold); font-weight: 700; }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; margin-top: 2.5rem; }
+    .metric-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(46,196,182,0.2);
+      border-radius: 10px; padding: 1.4rem; text-align: center;
+    }
+    .metric-val { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.8rem; color: var(--teal); }
+    .metric-label { font-size: .78rem; color: rgba(255,255,255,0.6); margin-top: .3rem; line-height: 1.4; }
+
+    /* ── TECNOLOGÍA ── */
+    #tecnologia { background: var(--white); }
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2.5rem; }
+    .tech-item {
+      display: flex; align-items: center; gap: .9rem;
+      background: var(--light); border-radius: 10px; padding: 1rem 1.2rem;
+      border: 1px solid rgba(15,42,74,0.08);
+    }
+    .tech-icon { font-size: 1.5rem; }
+    .tech-info h5 { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .88rem; color: var(--navy); }
+    .tech-info p { font-size: .75rem; color: var(--gray); }
+
+    /* ── FORMA DE TRABAJO ── */
+    #equipo { background: var(--light); }
+    .equipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem; }
+    .equipo-block { background: var(--white); border-radius: 12px; padding: 1.8rem; box-shadow: 0 2px 12px rgba(15,42,74,0.07); }
+    .equipo-block h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); margin-bottom: 1rem; font-size: 1rem; padding-bottom: .6rem; border-bottom: 2px solid var(--gold); }
+    .equipo-block p, .equipo-block li { font-size: .9rem; color: var(--gray); line-height: 1.7; }
+    .equipo-block ul { padding-left: 1.2rem; }
+    .equipo-block li { margin-bottom: .4rem; }
+    .consideracion {
+      background: var(--white); border-radius: 12px; padding: 1.5rem 1.8rem;
+      box-shadow: 0 2px 12px rgba(15,42,74,0.07); margin-top: 1rem;
+      border-left: 4px solid var(--teal);
+    }
+    .consideracion h5 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); margin-bottom: .4rem; font-size: .92rem; }
+    .consideracion p { font-size: .88rem; color: var(--gray); line-height: 1.7; }
+
+    /* ── IA ÉTICA ── */
+    #ia { background: var(--navy); }
+    .ia-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+    .ia-card {
+      background: rgba(255,255,255,0.06); border-radius: 12px; padding: 1.8rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .ia-card h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--gold); margin-bottom: .8rem; font-size: .95rem; }
+    .ia-card p, .ia-card li { font-size: .88rem; color: rgba(255,255,255,0.72); line-height: 1.7; }
+    .ia-card ul { padding-left: 1.2rem; }
+    .ia-card li { margin-bottom: .3rem; }
+    .prompt-box {
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(245,166,35,0.3);
+      border-radius: 8px; padding: 1rem 1.2rem; margin-top: .8rem;
+      font-family: monospace; font-size: .78rem; color: var(--gold); line-height: 1.6;
+    }
+
+    /* ── CONCLUSIONES ── */
+    #conclusiones { background: var(--white); }
+    .conclu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+    .conclu-card {
+      background: var(--light); border-radius: 12px; padding: 1.8rem;
+      border-top: 4px solid var(--navy);
+    }
+    .conclu-card h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--navy); margin-bottom: .6rem; font-size: .95rem; }
+    .conclu-card p { font-size: .88rem; color: var(--gray); line-height: 1.7; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark); color: rgba(255,255,255,0.5);
+      text-align: center; padding: 2.5rem 5%; font-size: .82rem;
+    }
+    footer span { color: var(--gold); font-weight: 700; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .problema-grid, .equipo-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 1.5rem; }
+      .comp-table { font-size: .78rem; }
+      .comp-table th, .comp-table td { padding: 8px 10px; }
+    }
+
+    /* scroll reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">VeraguasAR</div>
+  <ul class="nav-links">
+    <li><a href="#problema">Problema</a></li>
+    <li><a href="#propuesta">Propuesta</a></li>
+    <li><a href="#metodologia">Metodología</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#equipo">Equipo</a></li>
+    <li><a href="#ia">Uso de IA</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="particles"></canvas>
+  <div class="hero-eyebrow">Proyecto TIC — Universidad Tecnológica de Panamá</div>
+  <h1 class="hero-title">Turismo en Veraguas<br/>con <span>Realidad Aumentada</span></h1>
+  <p class="hero-sub">VeraguasAR es una propuesta de aplicación móvil que usa RA para mostrar al mundo el patrimonio natural, histórico y cultural de la provincia de Veraguas, Panamá.</p>
+  <div class="hero-btns">
+    <a href="#propuesta" class="btn-primary">Explorar la propuesta</a>
+    <a href="#resultados" class="btn-outline">Ver resultados</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">270K</div><div class="stat-label">hectáreas — Coiba UNESCO</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">sitios turísticos cubiertos</div></div>
+    <div class="stat"><div class="stat-num">$0</div><div class="stat-label">costo estimado del prototipo</div></div>
+    <div class="stat"><div class="stat-num">2</div><div class="stat-label">idiomas: español e inglés</div></div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section id="problema">
+  <div class="reveal">
+    <div class="section-eyebrow">El problema</div>
+    <h2 class="section-title">Veraguas existe, pero no se ve en internet</h2>
+    <div class="divider"></div>
+    <p class="section-lead">Panamá recibió 1,87 millones de turistas en 2023. La mayoría visitó la capital. Veraguas, con uno de los parques naturales más importantes del mundo, sigue siendo invisible en el ecosistema digital global.</p>
+  </div>
+  <div class="problema-grid reveal">
+    <div class="problema-text">
+      <p>La provincia de Veraguas alberga el <strong>Parque Nacional Coiba</strong>, Patrimonio Natural de la Humanidad declarado por la UNESCO en 2005. También cuenta con la histórica <strong>Iglesia de San Francisco de la Montaña</strong>, la mundialmente reconocida <strong>playa Santa Catalina</strong> y una riqueza cultural única en danzas como los <strong>Diablicos Sucios</strong>.</p>
+      <p>Sin embargo, la falta de herramientas digitales modernas provoca que turistas bien informados de Europa o Norteamérica simplemente <strong>no encuentren el destino</strong> cuando buscan en línea, y no lo seleccionan al planificar su viaje.</p>
+      <p>Ante este escenario, la tecnología de <strong>Realidad Aumentada (RA)</strong> emerge como una solución innovadora, accesible y de bajo costo para poner a Veraguas en el mapa digital global.</p>
+    </div>
+    <div class="card-list">
+      <div class="card-item">
+        <h4>🌐 Baja presencia digital</h4>
+        <p>Los atractivos de Veraguas aparecen con escasa profundidad en línea, lo que los hace invisibles para los turistas que planifican su viaje desde internet.</p>
+      </div>
+      <div class="card-item">
+        <h4>📱 Sin herramientas de RA locales</h4>
+        <p>Ninguna aplicación existente —Google Arts & Culture, izi.TRAVEL, CulturAR— cubre los destinos turísticos de Veraguas con tecnología de RA.</p>
+      </div>
+      <div class="card-item">
+        <h4>📊 Potencial turístico desaprovechado</h4>
+        <p>Panamá tiene 5,34 millones de conexiones móviles activas (118,6% de la población), una base sólida para una app móvil, pero sin soluciones orientadas al interior del país.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROPUESTA -->
+<section id="propuesta">
+  <div class="reveal">
+    <div class="section-eyebrow" style="color:var(--teal)">La solución</div>
+    <h2 class="section-title light">VeraguasAR: 6 módulos, un solo destino</h2>
+    <div class="divider"></div>
+    <p class="section-lead light">Una aplicación móvil de realidad aumentada disponible para Android e iOS que combina GPS, marcadores QR y modelos 3D para transformar la experiencia turística de Veraguas.</p>
+  </div>
+  <div class="modules-grid reveal">
+    <div class="module-card">
+      <div class="module-icon">🗺️</div>
+      <h4>Mapa interactivo</h4>
+      <p>El usuario visualiza todos los puntos de interés turístico de Veraguas en un mapa. Al acercarse a un sitio, la app lo notifica y activa la RA automáticamente.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🚶</div>
+      <h4>Rutas turísticas</h4>
+      <p>Rutas prediseñadas: Natural (Coiba → Santa Catalina → La Yeguada), Histórico-Cultural (San Francisco de la Montaña → Santiago) y de Aventura (cerros y senderos).</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🐋</div>
+      <h4>Guía fauna y flora</h4>
+      <p>Apunta la cámara al mar o la vegetación en Coiba y aparecen en RA las especies del ecosistema: tiburones ballena, ballenas jorobadas, aves endémicas y más.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🏛️</div>
+      <h4>Reconstrucciones históricas 3D</h4>
+      <p>En sitios como la Iglesia de San Francisco de la Montaña, el usuario ve a través de la cámara cómo lucía el lugar en el siglo XVII con modelos 3D superpuestos al entorno real.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">ℹ️</div>
+      <h4>Información en tiempo real</h4>
+      <p>Capas de información flotante con historia del lugar, horarios, cómo llegar, costo de entrada y recomendaciones. Disponible en español e inglés.</p>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🏆</div>
+      <h4>Gamificación</h4>
+      <p>Sellos Veragüenses al visitar cada sitio, misiones temáticas, ranking de exploradores e insignias digitales compartibles en redes sociales para promover el destino.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SITIOS -->
+<section id="sitios">
+  <div class="reveal">
+    <div class="section-eyebrow">Cobertura</div>
+    <h2 class="section-title">Sitios turísticos cubiertos</h2>
+    <div class="divider"></div>
+    <p class="section-lead">VeraguasAR cubre en su versión inicial los seis atractivos más representativos de la provincia.</p>
+  </div>
+  <div class="sitios-grid reveal">
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Natural / UNESCO</div>
+        <h3>Parque Nacional Coiba</h3>
+      </div>
+      <div class="sitio-body">
+        <p>270,125 hectáreas de reserva marina declaradas Patrimonio Natural de la Humanidad en 2005. Laboratorio natural excepcional con biodiversidad única en el Pacífico.</p>
+        <span class="sitio-tag">Fauna marina · Flora · Historia penal</span>
+      </div>
+    </div>
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Natural</div>
+        <h3>Playa Santa Catalina</h3>
+      </div>
+      <div class="sitio-body">
+        <p>Reconocida internacionalmente como uno de los mejores destinos de surf de Centroamérica, con un ecosistema marino de primer nivel.</p>
+        <span class="sitio-tag">Surf · Ecosistema marino</span>
+      </div>
+    </div>
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Histórico-Colonial</div>
+        <h3>Iglesia San Francisco de la Montaña</h3>
+      </div>
+      <div class="sitio-body">
+        <p>Joya del patrimonio colonial panameño. La RA permite ver cómo lucía el templo en el siglo XVII con personajes virtuales que narran su historia.</p>
+        <span class="sitio-tag">Reconstrucción 3D · Narración histórica</span>
+      </div>
+    </div>
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Natural</div>
+        <h3>Reserva Forestal La Yeguada</h3>
+      </div>
+      <div class="sitio-body">
+        <p>Bosque nublado con senderos interactivos donde la RA identifica especies de flora y fauna endémica de las tierras altas de Veraguas.</p>
+        <span class="sitio-tag">Flora · Fauna · Senderos</span>
+      </div>
+    </div>
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Cultural</div>
+        <h3>Ciudad de Santiago</h3>
+      </div>
+      <div class="sitio-body">
+        <p>Capital provincial con un rico patrimonio urbano y cultural, incluyendo las danzas de los Diablicos Sucios y la Montezuma Española.</p>
+        <span class="sitio-tag">Patrimonio urbano · Danzas</span>
+      </div>
+    </div>
+    <div class="sitio-card">
+      <div class="sitio-header">
+        <div class="sitio-tipo">Aventura</div>
+        <h3>Cerro Hoya / La Silampa</h3>
+      </div>
+      <div class="sitio-body">
+        <p>Rutas de senderismo de alta montaña con biodiversidad excepcional. La RA guía al visitante paso a paso y muestra las especies del camino.</p>
+        <span class="sitio-tag">Senderismo · Biodiversidad</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METODOLOGÍA -->
+<section id="metodologia">
+  <div class="reveal">
+    <div class="section-eyebrow">Cómo se desarrolló</div>
+    <h2 class="section-title">Metodología del proyecto</h2>
+    <div class="divider"></div>
+    <p class="section-lead">El proyecto siguió una metodología descriptiva-propositiva con enfoque cualitativo, estructurada en tres grandes etapas.</p>
+  </div>
+  <div class="fases reveal">
+    <div class="fase" data-num="1">
+      <div class="fase-label">Fase 1</div>
+      <h4>Revisión bibliográfica</h4>
+      <p>Búsqueda sistemática en ScienceDirect, Emerald Publishing, Taylor & Francis y Google Scholar con términos como "augmented reality tourism" y "realidad aumentada turismo cultural". Se seleccionaron fuentes con antigüedad máxima de 9 años.</p>
+    </div>
+    <div class="fase" data-num="2">
+      <div class="fase-label">Fase 2</div>
+      <h4>Análisis comparativo</h4>
+      <p>Se evaluaron las principales apps de RA para turismo: Google Arts & Culture, izi.TRAVEL y CulturAR, comparando RA, GPS, QR, modo offline, gamificación y cobertura geográfica para identificar la brecha que justifica VeraguasAR.</p>
+    </div>
+    <div class="fase" data-num="3">
+      <div class="fase-label">Fase 3</div>
+      <h4>Diseño conceptual</h4>
+      <p>Con base en los hallazgos, se diseñó la arquitectura técnica de VeraguasAR: módulos funcionales, tecnologías (ARCore, ARKit, Unity 3D, Firebase), sitios cubiertos y métricas de evaluación propuestas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTADOS -->
+<section id="resultados">
+  <div class="reveal">
+    <div class="section-eyebrow" style="color:var(--teal)">Hallazgos</div>
+    <h2 class="section-title light">Resultados y discusión</h2>
+    <div class="divider"></div>
+    <p class="section-lead light">El análisis comparativo confirma que ninguna app existente cubre Veraguas con RA. VeraguasAR llena ese vacío con una solución técnica viable y de bajo costo.</p>
+  </div>
+
+  <div class="reveal" style="overflow-x:auto; margin-top:2rem;">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Criterio</th>
+          <th>Google Arts & Culture</th>
+          <th>izi.TRAVEL</th>
+          <th>CulturAR</th>
+          <th>VeraguasAR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Realidad Aumentada</td><td class="yes">Sí (limitada)</td><td class="no">No</td><td class="yes">Sí</td><td class="veraguas">Sí (completa)</td></tr>
+        <tr><td>Geolocalización GPS</td><td>Parcial</td><td class="yes">Sí</td><td class="yes">Sí</td><td class="veraguas">Sí</td></tr>
+        <tr><td>Marcadores QR</td><td class="no">No</td><td class="no">No</td><td class="yes">Sí</td><td class="veraguas">Sí</td></tr>
+        <tr><td>Modo offline</td><td>Parcial</td><td class="yes">Sí</td><td class="no">No especif.</td><td class="veraguas">Sí</td></tr>
+        <tr><td>Gamificación</td><td class="no">No</td><td>Básica</td><td class="no">No</td><td class="veraguas">Sí (completa)</td></tr>
+        <tr><td>Cobertura Veraguas</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="veraguas">Sí (exclusiva)</td></tr>
+        <tr><td>Guía fauna y flora</td><td>Limitada</td><td class="no">No</td><td class="no">No</td><td class="veraguas">Sí</td></tr>
+        <tr><td>Reconstrucciones 3D</td><td>Parcial</td><td class="no">No</td><td class="no">No</td><td class="veraguas">Sí</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="metrics-grid reveal" style="margin-top:3rem;">
+    <div class="metric-card"><div class="metric-val">≥70</div><div class="metric-label">Puntaje SUS de usabilidad esperado</div></div>
+    <div class="metric-card"><div class="metric-val">≥80%</div><div class="metric-label">Satisfacción positiva del usuario</div></div>
+    <div class="metric-card"><div class="metric-val">500+</div><div class="metric-label">Descargas esperadas en el primer mes</div></div>
+    <div class="metric-card"><div class="metric-val">≥3</div><div class="metric-label">Sitios visitados por sesión de usuario</div></div>
+    <div class="metric-card"><div class="metric-val">$0–300</div><div class="metric-label">Costo estimado del prototipo en USD</div></div>
+  </div>
+</section>
+
+<!-- TECNOLOGÍA -->
+<section id="tecnologia">
+  <div class="reveal">
+    <div class="section-eyebrow">Stack técnico</div>
+    <h2 class="section-title">Tecnologías utilizadas</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="tech-grid reveal">
+    <div class="tech-item"><div class="tech-icon">🎮</div><div class="tech-info"><h5>Unity 3D + AR Foundation</h5><p>Motor de desarrollo multiplataforma</p></div></div>
+    <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-info"><h5>ARCore (Android)</h5><p>SDK oficial de Google para RA</p></div></div>
+    <div class="tech-item"><div class="tech-icon">🍎</div><div class="tech-info"><h5>ARKit (iOS)</h5><p>SDK oficial de Apple para RA</p></div></div>
+    <div class="tech-item"><div class="tech-icon">🗺️</div><div class="tech-info"><h5>Google Maps API</h5><p>Geolocalización y navegación</p></div></div>
+    <div class="tech-item"><div class="tech-icon">🔥</div><div class="tech-info"><h5>Firebase</h5><p>Base de datos y hosting en la nube</p></div></div>
+    <div class="tech-item"><div class="tech-icon">📦</div><div class="tech-info"><h5>CDN de contenido</h5><p>Distribución de modelos 3D y multimedia</p></div></div>
+    <div class="tech-item"><div class="tech-icon">📱</div><div class="tech-info"><h5>Android 7.0+ / iOS 13+</h5><p>Plataformas objetivo</p></div></div>
+    <div class="tech-item"><div class="tech-icon">🌐</div><div class="tech-info"><h5>Modo offline</h5><p>Funciona sin conexión continua</p></div></div>
+  </div>
+</section>
+
+<!-- EQUIPO -->
+<section id="equipo">
+  <div class="reveal">
+    <div class="section-eyebrow">Forma de trabajo</div>
+    <h2 class="section-title">Organización del equipo</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="equipo-grid reveal">
+    <div class="equipo-block">
+      <h4>👥 Organización del grupo</h4>
+      <p>El equipo estuvo compuesto por estudiantes de la Facultad de Ingeniería de Sistemas Computacionales de la Universidad Tecnológica de Panamá, quienes trabajaron de forma colaborativa a lo largo del semestre para desarrollar la propuesta de investigación.</p>
+    </div>
+    <div class="equipo-block">
+      <h4>📋 Distribución de responsabilidades</h4>
+      <ul>
+        <li>Definición del tema y problemática</li>
+        <li>Revisión bibliográfica y estado del arte</li>
+        <li>Diseño conceptual de VeraguasAR</li>
+        <li>Redacción del artículo científico (formato JIC)</li>
+        <li>Desarrollo de la página web</li>
+        <li>Preparación de la presentación oral</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="reveal" style="margin-top:2rem;">
+    <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;color:var(--navy);margin-bottom:1rem;">💬 Consideraciones individuales</h3>
+    <div class="consideracion">
+      <h5>Alfredo Reigosa</h5>
+      <p>Este proyecto me permitió explorar cómo la tecnología puede ponerse al servicio del patrimonio y la identidad de nuestra región. Investigar sobre Veraguas me hizo valorar la riqueza natural y cultural que tenemos en nuestra propia provincia — desde Coiba hasta las danzas tradicionales — y entender que el problema no es la falta de atractivos, sino la falta de herramientas digitales que los proyecten al mundo. Proponer VeraguasAR como solución fue un ejercicio que integró todo lo aprendido en el curso: desde la identificación de una problemática real hasta el diseño de una propuesta técnica viable. Me llevo la convicción de que como ingenieros de sistemas tenemos la responsabilidad de crear tecnología con propósito, que resuelva problemas concretos de nuestra comunidad.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- USO ÉTICO DE IA -->
+<section id="ia">
+  <div class="reveal">
+    <div class="section-eyebrow" style="color:var(--teal)">Transparencia</div>
+    <h2 class="section-title light">Uso ético de Inteligencia Artificial</h2>
+    <div class="divider"></div>
+    <p class="section-lead light">Como parte de las políticas del curso, documentamos de forma transparente el uso de herramientas de IA en el desarrollo de este proyecto.</p>
+  </div>
+  <div class="ia-grid reveal">
+    <div class="ia-card">
+      <h4>🛠️ Herramientas utilizadas</h4>
+      <ul>
+        <li>Claude (Anthropic) — investigación, diseño conceptual, artículo y página web</li>
+        <li>Google Scholar — búsqueda de fuentes académicas</li>
+        <li>ScienceDirect / Emerald — verificación de referencias</li>
+      </ul>
+    </div>
+    <div class="ia-card">
+      <h4>🎯 Propósito de uso</h4>
+      <ul>
+        <li><strong style="color:var(--white)">Formulación:</strong> apoyo en la estructuración de la propuesta conceptual</li>
+        <li><strong style="color:var(--white)">Investigación:</strong> búsqueda y organización de fuentes bibliográficas</li>
+        <li><strong style="color:var(--white)">Diseño:</strong> arquitectura técnica de VeraguasAR</li>
+        <li><strong style="color:var(--white)">Maquetación:</strong> desarrollo de esta página web</li>
+      </ul>
+    </div>
+    <div class="ia-card">
+      <h4>📸 Evidencia — Prompts utilizados</h4>
+      <div class="prompt-box">"necesito que me ayudes en la investigacion de esto [tema: RA para turismo en Veraguas]"</div>
+      <div class="prompt-box" style="margin-top:.5rem;">"hagamoslo [diseño de la propuesta conceptual de VeraguasAR]"</div>
+      <div class="prompt-box" style="margin-top:.5rem;">"necesitamos una pagina web [...] aplica teoria del color para una mejor visibilidad"</div>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:2rem;padding:1.5rem;background:rgba(255,255,255,0.05);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+    <p style="color:rgba(255,255,255,0.7);font-size:.9rem;line-height:1.8;">⚠️ <strong style="color:var(--gold)">Nota de responsabilidad:</strong> Toda la información generada con herramientas de IA fue revisada, verificada y validada por el equipo. Las referencias bibliográficas fueron confirmadas individualmente. El equipo asume plena responsabilidad por el contenido entregado, tal como lo establece la guía del curso.</p>
+  </div>
+</section>
+
+<!-- CONCLUSIONES -->
+<section id="conclusiones">
+  <div class="reveal">
+    <div class="section-eyebrow">Cierre</div>
+    <h2 class="section-title">Conclusiones</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="conclu-grid reveal">
+    <div class="conclu-card">
+      <h4>Patrimonio desaprovechado</h4>
+      <p>Veraguas tiene patrimonio de clase mundial —encabezado por Coiba— que permanece subexplotado por la escasa presencia digital de sus atractivos.</p>
+    </div>
+    <div class="conclu-card">
+      <h4>Brecha tecnológica confirmada</h4>
+      <p>Ninguna app existente ofrece RA para los destinos de Veraguas, lo que valida la pertinencia y originalidad de VeraguasAR.</p>
+    </div>
+    <div class="conclu-card">
+      <h4>Viabilidad técnica y económica</h4>
+      <p>El prototipo puede desarrollarse con herramientas gratuitas (ARCore, Unity, Firebase) por un costo entre USD 0 y 300, lo que lo hace viable en contexto universitario.</p>
+    </div>
+    <div class="conclu-card">
+      <h4>Trabajo futuro</h4>
+      <p>Desarrollar el prototipo funcional, validarlo con pruebas de usabilidad reales (Escala SUS) y explorar IA para personalizar rutas según el perfil del turista.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><span>VeraguasAR</span> — Propuesta de Aplicación de Realidad Aumentada para el Turismo en Veraguas, Panamá</p>
+  <p style="margin-top:.5rem;">Facultad de Ingeniería de Sistemas Computacionales · Universidad Tecnológica de Panamá · 2025</p>
+</footer>
+
+<script>
+// Particles
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resize() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function createParticle() {
+  return {
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 0.5,
+    alpha: Math.random() * 0.5 + 0.1,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.4 - 0.1
+  };
+}
+
+for (let i = 0; i < 80; i++) particles.push(createParticle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(245,166,35,${p.alpha})`;
+    ctx.fill();
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.y < -5) particles[i] = createParticle();
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+reveals.forEach(r => obs.observe(r));
+</script>
+</body>
+</html>
+ENDOFSCRIPT
